@@ -3,28 +3,134 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | BuddyFight</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>BuddyFight</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <link rel="manifest" href="manifest.webmanifest">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jersey+10&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="unity-container">
-      <canvas id="unity-canvas" width=600 height=960 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- ton connection -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
+      <!-- Google tag (gtag.js) -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-TK7FLRSWLV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-TK7FLRSWLV');
+  </script> -->
+  <!-- Sentry -->
+  <!-- <script
+    src="https://js.sentry-cdn.com/816d31dd90e86dc8e297afd711321e14.min.js"
+    crossorigin="anonymous"
+    async
+  ></script>
+
+  <script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script> -->
+  <!-- <script>
+  // 初始化
+    var vConsole = new VConsole();
+    console.log('Hello world');
+  </script> -->
+
+
+<div id="unity-container">
+  <canvas id="unity-canvas" width=640 height=960 tabindex="-1"></canvas>
+  <div id="unity-loading-bar">
+    <div id="unity-logo"></div>
+    <div id ="text-under">Farmastia</div>
+    <!-- <div id ="text-under2">Running,Racing,Clash!!</div> -->
+    <div id="unity-progress-bar-empty">
+      <div id="unity-progress-bar-full"></div>
     </div>
+  </div>
+  <div id="unity-warning"> </div>
+</div>
+<div id="ton-connect-button"></div>
+    <!-- <script src="https://cdn-web-sg.botim.me/upd/v1/mp/package/framework/35.0.0/framework.universal-35.0.0.js"></script> -->
     <script>
-      window.addEventListener("load", function () {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("ServiceWorker.js");
+      // window.addEventListener("load", function () {
+      //   if ("serviceWorker" in navigator) {
+      //     navigator.serviceWorker.register("ServiceWorker.js");
+      //   }
+      // });
+
+      import { toNano } from '@ton/core';
+
+      const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+       manifestUrl: 'https://web-dev.farmastia.com/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-button',
+        });
+          tonConnectUI.uiOptions = {
+            twaReturnUrl: 'https://t.me/Farmastia_bot/farm'
+          };
+            let wallet;
+      async function connectToTon(){
+        wallet = await tonConnectUI.connectWallet();
+        console.log(wallet);
+        console.log("connectToTon");
+      }
+
+      async function sendUsdt(cost){
+
+        if (!wallet) return;
+
+        const usdtJettonAddress = new Address("<usdt-jetton-address>");
+        const toAddress = new Address("<recipient-address>");
+        const jettonAmount = 1; // 发送 1 USDT
+
+                // 创建转移消息
+        const transferMessage = beginCell()
+          .storeUint(0xf8a7ea5, 32) // 具体根据 USDT Jetton 合约定义
+          .storeAddress(toAddress)
+          .storeCoins(jettonAmount)
+          .endCell();
+
+        try {
+          const seqno = await client.getSeqno(wallet.address);
+          await client.sendTransaction({
+            from: wallet.address,
+            to: usdtJettonAddress,
+            value: toNano(cost), // 费用
+            payload: transferMessage,
+            seqno: seqno,
+          });
+        } catch (error) {
+          console.error('Failed to send USDT:', error);
         }
-      });
+
+      }
+
+      async function sendTonTransaction(amount) {
+        const transaction = {
+          messages: [
+            {
+              address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",  // 目标地址
+              amount: amount  // 动态设置金额（Toncoin，以nanoton为单位）
+            }
+          ]
+        };
+
+        try {
+          const result = await tonConnectUI.sendTransaction(transaction);
+          console.log('Transaction sent successfully:', result);
+        } catch (error) {
+          console.error('Error sending transaction:', error);
+        }
+      }
+
 
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
@@ -56,16 +162,16 @@
         updateBannerVisibility();
       }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/buddyGL.loader.js";
+      var buildUrl = "Build1.001b";
+      var loaderUrl = buildUrl + "/WEB.loader.js";
       var config = {
-        dataUrl: buildUrl + "/buddyGL.data",
-        frameworkUrl: buildUrl + "/buddyGL.framework.js",
-        codeUrl: buildUrl + "/buddyGL.wasm",
+        dataUrl: buildUrl + "/WEB.data",
+        frameworkUrl: buildUrl + "/WEB.framework.js",
+        codeUrl: buildUrl + "/WEB.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "PlayTwist",
         productName: "BuddyFight",
-        productVersion: "1.0",
+        productVersion: "1.001",
         showBanner: unityShowBanner,
       };
 
@@ -82,21 +188,37 @@
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
         document.getElementsByTagName('head')[0].appendChild(meta);
+      }else{
+        canvas.style.width = "71.25vh"//"53.43vh"//"1080px";
+        canvas.style.height = "95vh"//"1920px";
       }
 
       loadingBar.style.display = "block";
 
       var script = document.createElement("script");
       script.src = loaderUrl;
+      var curUnityInstance = null;
+      var MyBridge = null;
+      window.Telegram.WebApp.expand();
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           loadingBar.style.display = "none";
+          curUnityInstance = unityInstance;
+          console.log("unityInstance load done" )
+          console.log("initdata" +window.Telegram.WebApp.initData)
+          unityInstance.SendMessage('TgCaller', 'SetUserId', window.Telegram.WebApp.initData);
+          // trackEvent("loadingdone", 1);
+
         }).catch((message) => {
           alert(message);
         });
+
+
       };
+
+
       document.body.appendChild(script);
     </script>
   </body>

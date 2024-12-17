@@ -1,9 +1,9 @@
-const cacheName = "PlayTwist-BuddyFight-1.0";
+const cacheName = "PlayTwist-BuddyFight-1.001";
 const contentToCache = [
-    "Build/buddyGL.loader.js",
-    "Build/buddyGL.framework.js",
-    "Build/buddyGL.data",
-    "Build/buddyGL.wasm",
+    "Build/WEB.loader.js",
+    "Build/WEB.framework.js",
+    "Build/WEB.data",
+    "Build/WEB.wasm",
     "TemplateData/style.css"
 
 ];
